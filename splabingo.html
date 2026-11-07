@@ -1,0 +1,1102 @@
+
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f8eff5">
+<title>スプラお題ビンゴ</title>
+<style>
+:root{
+  font-family:system-ui,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+  color:#3d3440;background:#fbf7fb;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  --ink:#503951;
+  --accent:#e65a96;
+  --tint:#fde4ef;
+  --ring:#f6aacd;
+}
+body[data-theme=sky]{
+  --ink:#304d71;--accent:#4c91d3;
+  --tint:#e1efff;--ring:#b2d8ff;
+}
+body[data-theme=mint]{
+  --ink:#2c655c;--accent:#2f9e86;
+  --tint:#e0f5ed;--ring:#a4e8d3;
+}
+button,input,select{font:inherit}
+button{cursor:pointer;touch-action:manipulation}
+button:disabled{cursor:not-allowed;opacity:.5}
+input:focus-visible,button:focus-visible,select:focus-visible{
+  outline:3px solid var(--accent);outline-offset:3px;
+}
+.shell{max-width:1150px;margin:auto;padding:22px 17px 64px}
+.hero{text-align:center;padding:12px 0 19px}
+.eyebrow{
+  font-size:12px;font-weight:900;
+  letter-spacing:.19em;color:var(--accent);
+}
+h1{
+  font-size:clamp(27px,5.3vw,50px);
+  margin:6px 0 9px;letter-spacing:-.05em;
+}
+.hero p{margin:0;color:#806f81;font-size:13px;line-height:1.6}
+.topline{
+  display:flex;justify-content:space-between;
+  align-items:center;gap:12px;margin:18px 0;flex-wrap:wrap;
+}
+.tag{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:8px 12px;background:#f0e8f0;
+  border-radius:99px;font-size:12px;font-weight:800;
+}
+.tag[data-kind=live]{background:#e3f5ed;color:#197655}
+.tag[data-kind=demo]{background:#fff1d5;color:#8c611a}
+.tag[data-kind=error]{background:#ffe9e7;color:#bb3930}
+.button{
+  border:1px solid #eddfec;background:#fff;color:#5c4860;
+  font-weight:800;padding:11px 15px;border-radius:12px;
+  box-shadow:0 3px 0 #efe5ee;font-size:13px;line-height:1.25;
+}
+.button:hover{filter:brightness(.985)}
+.button:active{transform:translateY(2px);box-shadow:none}
+.primary{
+  background:var(--accent);border-color:var(--accent);
+  color:#fff;box-shadow:0 3px 0 #a94c7b44;
+}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.layout{
+  display:grid;
+  grid-template-columns:minmax(0,1.45fr) minmax(260px,.78fr);
+  align-items:start;gap:22px;
+}
+.panel{
+  background:#fff;border:1px solid #efe6ef;
+  border-radius:20px;padding:21px;
+  box-shadow:0 10px 28px #4a34510b;
+}
+.board-title{
+  font-size:clamp(20px,3vw,27px);
+  margin:0 0 12px;text-align:center;
+  overflow-wrap:anywhere;
+}
+.board{
+  --n:5;background:var(--ink);
+  padding:clamp(8px,2vw,18px);
+  border-radius:21px;
+  box-shadow:0 12px 27px #34283c40;
+}
+.board-head,.board-cells{
+  display:grid;
+  grid-template-columns:repeat(var(--n),minmax(0,1fr));
+  gap:clamp(4px,1.1vw,9px);
+}
+.board-head{
+  padding:0 0 11px;text-align:center;
+  color:#ffe5f1;font-weight:1000;
+  font-size:clamp(21px,4vw,37px);
+  letter-spacing:.07em;
+}
+.board-cells button{
+  min-width:0;aspect-ratio:1;border:0;
+  border-radius:10px;background:#fffdfd;
+  color:#453846;position:relative;
+  padding:5px;font-weight:800;
+  font-size:clamp(9px,1.48vw,14px);
+  line-height:1.3;overflow:hidden;
+  overflow-wrap:anywhere;white-space:normal;
+}
+.board-cells button.long{
+  font-size:clamp(8px,1.16vw,12px);
+}
+.board-cells button.hole{
+  background:radial-gradient(
+    circle at 50% 50%,
+    var(--ink) 0 59%,#fffdfd 63% 100%
+  );
+}
+.board-cells button.hole::before{
+  content:"";position:absolute;inset:17%;
+  border:3px solid var(--ring);
+  border-radius:50%;
+  box-shadow:inset 0 3px 12px #160b2666;
+  pointer-events:none;
+}
+.board-cells button.hole span{visibility:hidden}
+.board-cells button.win::before{
+  border-color:#ffe47a;
+  box-shadow:0 0 16px #fff09f;
+}
+.hint{
+  font-size:12px;color:#8a7d8e;line-height:1.7;
+}
+.stat-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:7px;
+}
+.stat{
+  background:#faf5fa;border-radius:12px;
+  padding:12px 4px;text-align:center;
+  font-size:11px;color:#827486;
+}
+.stat strong{
+  font-size:29px;color:var(--accent);
+  display:block;line-height:1.2;
+}
+.meter{
+  height:9px;background:#f3e7f0;
+  border-radius:99px;overflow:hidden;margin:14px 0;
+}
+.meter div{
+  background:var(--accent);
+  height:100%;width:0;transition:width .15s;
+}
+.notice{
+  font-size:13px;line-height:1.6;
+  font-weight:700;padding:12px;
+  border-radius:12px;background:var(--tint);
+  margin:10px 0 0;
+}
+h2{font-size:19px;margin:0 0 15px}
+h3{font-size:16px;margin:0 0 12px}
+.tools{
+  display:grid;
+  grid-template-columns:1fr 1fr;gap:9px;
+}
+.tools button{width:100%}
+.editor{display:none}
+.editor[data-open=true]{display:block}
+.game[data-open=false]{display:none}
+label{
+  display:block;font-size:13px;
+  font-weight:800;margin:11px 0 6px;
+}
+input[type=text],input[type=email],
+input[type=password],select{
+  padding:12px 11px;width:100%;
+  border:1px solid #e3d7e3;
+  border-radius:11px;background:#fff;color:#3d3440;
+}
+.input-row{
+  display:grid;grid-template-columns:1fr 180px;gap:12px;
+}
+.edit-grid{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:9px;max-height:390px;overflow:auto;
+  padding:5px 3px 5px 0;
+}
+.edit-cell{
+  background:#fbf8fb;border:1px solid #eee3ee;
+  border-radius:12px;padding:9px;
+}
+.edit-cell label{
+  margin:0 0 5px;color:#796c7c;font-size:11px;
+}
+.edit-cell input{font-size:12px;padding:9px 7px}
+.edit-cell.center{
+  background:var(--tint);border-color:var(--ring);
+}
+.edit-cell.center label{color:var(--accent)}
+.edit-preview{
+  display:grid;
+  grid-template-columns:repeat(var(--n),minmax(0,1fr));
+  gap:5px;background:var(--ink);
+  padding:9px;border-radius:12px;
+}
+.edit-preview div{
+  background:#fffdfd;border-radius:6px;
+  aspect-ratio:1;display:grid;place-items:center;
+  font-size:clamp(9px,1vw,12px);
+  font-weight:750;line-height:1.2;
+  padding:4px;text-align:center;
+  word-break:break-word;overflow:hidden;
+}
+.edit-preview .center{background:var(--tint)}
+dialog{
+  border:0;border-radius:20px;
+  max-width:420px;width:calc(100% - 30px);
+  padding:24px;box-shadow:0 24px 75px #22162e66;
+}
+dialog::backdrop{background:#2b1c3588}
+dialog h2{margin-top:0}
+.footer{
+  text-align:center;color:#ab9eac;
+  margin-top:32px;font-size:11px;
+}
+#empty{
+  display:none;text-align:center;
+  padding:55px 10px;
+  border:2px dashed #dfcedf;
+  border-radius:20px;color:#7f7184;
+}
+@media(max-width:800px){
+  .layout{grid-template-columns:1fr}
+  .board-cells button{font-size:clamp(10px,2.5vw,16px)}
+  .board-cells button.long{font-size:clamp(9px,2vw,13px)}
+  .edit-preview div{font-size:clamp(8px,2vw,12px)}
+}
+@media(max-width:480px){
+  .shell{padding:14px 11px 40px}
+  .panel{padding:14px}
+  .board{padding:8px;border-radius:14px}
+  .board-head,.board-cells{gap:4px}
+  .board-cells button{
+    border-radius:6px;padding:3px;
+    font-size:clamp(8px,2.5vw,12px);
+  }
+  .board-cells button.long{
+    font-size:clamp(8px,2vw,10px);
+  }
+  .input-row{grid-template-columns:1fr}
+  .edit-grid{grid-template-columns:1fr}
+  .topline{justify-content:center}
+}
+@media print{
+  .hero,.topline,.side,.editor,.footer,
+  .hint,.notice{display:none!important}
+  .layout{display:block}
+  .board{
+    box-shadow:none;
+    max-width:850px;margin:auto;
+  }
+}
+</style>
+</head>
+<body data-theme="berry">
+
+<div class="shell">
+
+<header class="hero">
+  <div class="eyebrow">EVERYONE'S TASK BINGO</div>
+  <h1>スプラお題ビンゴ 🎯</h1>
+  <p>同じカードで、ひとりひとりのビンゴを楽しもう！</p>
+</header>
+
+<div class="topline">
+  <div id="connection" class="tag" data-kind="demo">
+    ● 初期設定を確認中
+  </div>
+  <div class="actions">
+    <button id="copyLink" class="button">
+      🔗 参加用URLをコピー
+    </button>
+    <button id="hostButton" class="button">
+      🔐 ホストログイン
+    </button>
+    <button id="logoutButton" class="button" hidden>
+      ログアウト
+    </button>
+  </div>
+</div>
+
+<section class="game layout" id="game" data-open="true">
+  <div>
+    <h2 id="boardTitle" class="board-title">読み込み中...</h2>
+    <div id="empty">
+      まだビンゴカードが公開されていません。
+      ホストが公開すると、ここに表示されます。
+    </div>
+    <div id="board" class="board">
+      <div id="head" class="board-head"></div>
+      <div id="cells" class="board-cells"></div>
+    </div>
+    <p class="hint" style="text-align:center">
+      達成したマスをタップすると穴が空くよ。
+      もう一度押すと戻せます。
+    </p>
+  </div>
+
+  <aside class="side">
+    <div class="panel">
+      <h3>📊 わたしの達成状況</h3>
+      <div class="stat-grid">
+        <div class="stat">
+          <strong id="done">0</strong>達成マス
+        </div>
+        <div class="stat">
+          <strong id="bingo">0</strong>ビンゴ
+        </div>
+        <div class="stat">
+          <strong id="reach">0</strong>リーチ
+        </div>
+      </div>
+      <div class="meter"><div id="meter"></div></div>
+      <div id="message" class="notice">
+        お題を達成してみよう！
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:16px">
+      <h3>✨ カードの操作</h3>
+      <div class="tools">
+        <button id="reset" class="button">
+          ↺ 自分の穴を戻す
+        </button>
+        <button id="print" class="button">
+          🖨️ 印刷する
+        </button>
+      </div>
+      <p class="hint">
+        穴の状態は各自のブラウザに保存されます。
+        他の人の穴には影響しません。
+        ホストがお題を再公開すると全員の穴が初期化されます。
+      </p>
+    </div>
+  </aside>
+</section>
+
+<section class="editor" id="editor" data-open="false">
+  <div class="layout">
+    <div class="panel">
+      <h2>✏️ ホスト用・お題編集</h2>
+      <p class="hint">
+        すべてのマスを自由に編集できます。
+        5×5の場合、13番が中央マスです。
+        FREE固定ではありません。
+      </p>
+
+      <label for="editTitle">カードのタイトル</label>
+      <input id="editTitle" type="text" maxlength="60"
+             placeholder="例：配信あるあるビンゴ">
+
+      <div class="input-row">
+        <div>
+          <label for="editSize">マスの大きさ</label>
+          <select id="editSize">
+            <option value="3">3×3</option>
+            <option value="4">4×4</option>
+            <option value="5">5×5</option>
+          </select>
+        </div>
+        <div>
+          <label for="editTheme">カードの色</label>
+          <select id="editTheme">
+            <option value="berry">💗 ベリー</option>
+            <option value="sky">💙 そら</option>
+            <option value="mint">💚 ミント</option>
+          </select>
+        </div>
+      </div>
+
+      <label>お題一覧（各マスを編集）</label>
+      <div class="edit-grid" id="editGrid"></div>
+
+      <p class="hint">
+        ※ 4×4は16マスすべて通常のお題として設定できます。
+      </p>
+
+      <div class="actions">
+        <button id="publish" class="button primary">
+          🌐 この内容を全員に公開する
+        </button>
+        <button id="cancelEdit" class="button">
+          キャンセル
+        </button>
+      </div>
+
+      <p id="publishStatus" class="hint" role="status"></p>
+    </div>
+
+    <aside class="panel">
+      <h3>👀 公開前プレビュー</h3>
+      <h3 id="previewTitle"></h3>
+      <div id="preview" class="edit-preview"></div>
+      <p class="hint">
+        「公開する」を押すまで、
+        参加者の画面には反映されません。
+      </p>
+    </aside>
+  </div>
+</section>
+
+<p class="footer">POKON! TASK BINGO</p>
+</div>
+
+<dialog id="loginDialog">
+  <h2>🔐 ホストログイン</h2>
+  <p class="hint">
+    ホストだけがお題を編集・公開できます。
+  </p>
+  <form id="loginForm">
+    <label for="loginEmail">メールアドレス</label>
+    <input type="email" id="loginEmail"
+           autocomplete="username" required>
+
+    <label for="loginPassword">パスワード</label>
+    <input type="password" id="loginPassword"
+           autocomplete="current-password" required>
+
+    <p id="loginError" class="hint" role="alert"></p>
+
+    <div class="actions">
+      <button type="submit" class="button primary">
+        ログイン
+      </button>
+      <button type="button" id="closeLogin" class="button">
+        閉じる
+      </button>
+    </div>
+  </form>
+</dialog>
+
+<script type="module">
+
+// ========================================
+// Firebase設定
+// Firebaseコンソールの値をここに貼ってね
+// ========================================
+
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  appId: "YOUR_APP_ID"
+};
+
+// ホスト用アカウントのUID
+const HOST_UID = "YOUR_HOST_UID";
+
+// ========================================
+// ここから下は基本的に変更不要
+// ========================================
+
+const $ = id => document.getElementById(id);
+
+const DEMO = firebaseConfig.apiKey === "YOUR_API_KEY";
+const LOCAL_KEY = "pokon-shared-main-marks";
+
+const demoItems = [
+  "初見さんが来る",
+  "ナイスなコメント",
+  "予想外の展開",
+  "褒められる",
+  "話題が脱線",
+  "思わず笑う",
+  "一度休憩",
+  "神プレイ",
+  "新しい発見",
+  "大逆転",
+  "面白いことが起きる",
+  "応援される",
+  "好きなお題を設定！",
+  "コメントが盛り上がる",
+  "ミスをする",
+  "新しい挑戦",
+  "記念撮影",
+  "みんなで拍手",
+  "あっと驚く",
+  "予想が当たる",
+  "盛り上がる",
+  "思い出を話す",
+  "目標達成",
+  "うれしい報告",
+  "最後に挨拶する"
+];
+
+const startBoard = () => ({
+  title: "配信あるあるビンゴ",
+  size: 5,
+  theme: "berry",
+  tasks: [...demoItems],
+  revision: "demo-1"
+});
+
+let board = DEMO ? startBoard() : null;
+let marks = new Set();
+let isHost = DEMO;
+let isEditor = false;
+let auth = null;
+let fireDoc = null;
+let firebaseFns = null;
+
+// 接続表示
+function showConnection(text, kind) {
+  $("connection").textContent = "● " + text;
+  $("connection").dataset.kind = kind;
+}
+
+// ビンゴのライン
+function cardLines(n) {
+  const result = [];
+
+  for (let r = 0; r < n; r++) {
+    result.push(
+      Array.from({length:n}, (_,c) => r*n+c)
+    );
+  }
+
+  for (let c = 0; c < n; c++) {
+    result.push(
+      Array.from({length:n}, (_,r) => r*n+c)
+    );
+  }
+
+  result.push(
+    Array.from({length:n}, (_,i) => i*n+i)
+  );
+
+  result.push(
+    Array.from({length:n}, (_,i) => i*n+n-1-i)
+  );
+
+  return result;
+}
+
+// ビンゴ数・リーチ数
+function getStats() {
+  const win = cardLines(board.size).filter(
+    line => line.every(i => marks.has(i))
+  );
+
+  const reach = cardLines(board.size).filter(
+    line => line.filter(i => !marks.has(i)).length === 1
+  ).length;
+
+  return {win, reach};
+}
+
+// 参加者それぞれの進行状況を読み込み
+function loadMarks() {
+  marks = new Set();
+
+  if (!board) return;
+
+  try {
+    const saved = JSON.parse(localStorage.getItem(LOCAL_KEY));
+
+    if (saved?.revision === board.revision) {
+      for (const i of saved.opened || []) {
+        if (
+          Number.isInteger(i) &&
+          i >= 0 &&
+          i < board.size * board.size
+        ) {
+          marks.add(i);
+        }
+      }
+    }
+  } catch {}
+}
+
+// 参加者それぞれの進行状況を保存
+function saveMarks() {
+  if (!board) return;
+
+  try {
+    localStorage.setItem(LOCAL_KEY, JSON.stringify({
+      revision: board.revision,
+      opened: [...marks]
+    }));
+  } catch {}
+}
+
+// 公開されたカードを反映
+function applyBoard(next) {
+  if (
+    !next ||
+    ![3,4,5].includes(next.size) ||
+    !Array.isArray(next.tasks) ||
+    next.tasks.length !== next.size ** 2
+  ) return;
+
+  const changed = board?.revision !== next.revision;
+
+  board = {
+    title: String(next.title),
+    size: next.size,
+    theme: next.theme,
+    tasks: next.tasks.map(String),
+    revision: String(next.revision)
+  };
+
+  if (changed) loadMarks();
+
+  render();
+}
+
+// ビンゴ画面描画
+function render() {
+  $("logoutButton").hidden = !isHost || DEMO;
+
+  $("hostButton").textContent = isHost
+    ? "✏️ ホスト編集画面"
+    : "🔐 ホストログイン";
+
+  document.body.dataset.theme = board?.theme || "berry";
+
+  if (!board) {
+    $("boardTitle").textContent = "公開待ち";
+    $("board").hidden = true;
+    $("empty").style.display = "block";
+    return;
+  }
+
+  $("board").hidden = false;
+  $("empty").style.display = "none";
+
+  const n = board.size;
+  const {win,reach} = getStats();
+  const winSet = new Set(win.flat());
+
+  $("boardTitle").textContent = board.title;
+
+  $("board").style.setProperty("--n", n);
+
+  $("head").replaceChildren();
+  $("cells").replaceChildren();
+
+  const labels = Array.from(
+    {length:n},
+    (_,i) => "BINGO"[i]
+  );
+
+  labels.forEach(t => {
+    const d = document.createElement("div");
+    d.textContent = t;
+    $("head").append(d);
+  });
+
+  board.tasks.forEach((task,i) => {
+    const button = document.createElement("button");
+    const span = document.createElement("span");
+
+    button.type = "button";
+    span.textContent = task;
+    button.append(span);
+
+    button.title = task;
+
+    button.setAttribute(
+      "aria-label",
+      task + (marks.has(i) ? "（達成済み）" : "")
+    );
+
+    button.setAttribute(
+      "aria-pressed",
+      String(marks.has(i))
+    );
+
+    if (task.length > 13) {
+      button.classList.add("long");
+    }
+
+    if (marks.has(i)) {
+      button.classList.add("hole");
+    }
+
+    if (winSet.has(i)) {
+      button.classList.add("win");
+    }
+
+    button.addEventListener("click", () => {
+      if (marks.has(i)) {
+        marks.delete(i);
+      } else {
+        marks.add(i);
+      }
+
+      saveMarks();
+      render();
+    });
+
+    $("cells").append(button);
+  });
+
+  $("done").textContent = marks.size;
+  $("bingo").textContent = win.length;
+  $("reach").textContent = reach;
+
+  $("meter").style.width =
+    (marks.size / (n*n) * 100) + "%";
+
+  if (win.length) {
+    $("message").textContent =
+      `🎉 ${win.length}ビンゴ！おめでとう！`;
+  } else if (reach) {
+    $("message").textContent =
+      `あと1マスでビンゴ！ リーチ ${reach}本 ✨`;
+  } else {
+    $("message").textContent =
+      "達成したマスをタップしてね！";
+  }
+}
+
+// ホスト編集画面切り替え
+function switchView(editor) {
+  isEditor = editor;
+
+  $("editor").dataset.open = String(editor);
+  $("game").dataset.open = String(!editor);
+
+  if (editor) loadEditor();
+}
+
+// 編集中のお題取得
+function getEditorTasks() {
+  return [...$("editGrid").querySelectorAll("input")]
+    .map(x => x.value.trim());
+}
+
+// お題入力欄作成
+function drawEditorGrid(tasks) {
+  const n = Number($("editSize").value);
+  const count = n*n;
+  const center = n%2 === 1
+    ? Math.floor(count/2)
+    : -1;
+
+  $("editGrid").replaceChildren();
+
+  for (let i = 0; i < count; i++) {
+    const box = document.createElement("div");
+    const label = document.createElement("label");
+    const input = document.createElement("input");
+
+    box.className =
+      "edit-cell" + (i === center ? " center" : "");
+
+    label.textContent = i === center
+      ? `★ ${i+1}番（中央マス）`
+      : `${i+1}番のマス`;
+
+    input.type = "text";
+    input.maxLength = 70;
+    input.value = tasks[i] || "";
+    input.placeholder = "お題を入力";
+
+    input.addEventListener("input", preview);
+
+    box.append(label,input);
+    $("editGrid").append(box);
+  }
+
+  preview();
+}
+
+// ホスト編集画面に現在のお題を反映
+function loadEditor() {
+  const b = board || startBoard();
+
+  $("editTitle").value = b.title;
+  $("editSize").value = String(b.size);
+  $("editTheme").value = b.theme;
+
+  drawEditorGrid(b.tasks);
+
+  $("publishStatus").textContent = "";
+}
+
+// プレビュー
+function preview() {
+  const n = Number($("editSize").value);
+  const tasks = getEditorTasks();
+
+  $("previewTitle").textContent =
+    $("editTitle").value || "お題ビンゴ";
+
+  $("preview").style.setProperty("--n",n);
+  $("preview").replaceChildren();
+
+  tasks.forEach((task,i) => {
+    const d = document.createElement("div");
+    d.textContent = task || "未入力";
+
+    if (
+      n%2 === 1 &&
+      i === Math.floor(n*n/2)
+    ) {
+      d.className = "center";
+    }
+
+    $("preview").append(d);
+  });
+
+  document.body.dataset.theme =
+    $("editTheme").value;
+}
+
+// 編集画面の操作
+$("editSize").addEventListener("change", () => {
+  drawEditorGrid(getEditorTasks());
+});
+
+$("editTitle").addEventListener("input",preview);
+$("editTheme").addEventListener("change",preview);
+
+// ホストログイン・編集ボタン
+$("hostButton").onclick = () => {
+  if (isHost) {
+    switchView(true);
+  } else {
+    $("loginError").textContent = "";
+    $("loginDialog").showModal();
+  }
+};
+
+$("cancelEdit").onclick = () => {
+  switchView(false);
+  render();
+};
+
+$("closeLogin").onclick = () => {
+  $("loginDialog").close();
+};
+
+// 自分の穴をリセット
+$("reset").onclick = () => {
+  if (!board) return;
+
+  if (confirm("自分が開けた穴をすべて元に戻しますか？")) {
+    marks.clear();
+    saveMarks();
+    render();
+  }
+};
+
+// 印刷
+$("print").onclick = () => window.print();
+
+// 参加用URLコピー
+$("copyLink").onclick = async () => {
+  if (location.protocol === "file:") {
+    alert(
+      "サイト公開後のURLを共有してください。"
+    );
+    return;
+  }
+
+  const url = location.origin + location.pathname;
+
+  try {
+    await navigator.clipboard.writeText(url);
+    alert("参加用URLをコピーしたよ！");
+  } catch {
+    prompt("参加用URLをコピーしてね",url);
+  }
+};
+
+// ホストによるお題公開
+$("publish").onclick = async () => {
+  if (!isHost) return;
+
+  const title = $("editTitle").value.trim();
+  const size = Number($("editSize").value);
+  const tasks = getEditorTasks();
+
+  if (!title) {
+    alert("タイトルを入力してね");
+    return;
+  }
+
+  if (tasks.some(t => !t)) {
+    alert("すべてのマスにお題を入力してね");
+    return;
+  }
+
+  const next = {
+    title,
+    size,
+    theme: $("editTheme").value,
+    tasks,
+    revision:
+      Date.now().toString(36) +
+      Math.random().toString(36).slice(2,9)
+  };
+
+  if (!confirm(
+    "公開すると参加者全員のカードが更新され、" +
+    "開けた穴が初期化されます。公開しますか？"
+  )) return;
+
+  $("publish").disabled = true;
+  $("publishStatus").textContent = "公開中...";
+
+  try {
+    if (DEMO) {
+      applyBoard(next);
+      showConnection(
+        "デモモード：この端末だけで表示中",
+        "demo"
+      );
+    } else {
+      await firebaseFns.setDoc(fireDoc,next);
+    }
+
+    $("publishStatus").textContent =
+      "✅ 公開しました！";
+
+    switchView(false);
+
+  } catch (e) {
+    $("publishStatus").textContent =
+      "公開できませんでした：" + e.message;
+
+  } finally {
+    $("publish").disabled = false;
+  }
+};
+
+// ホスト認証
+$("loginForm").addEventListener("submit",async e => {
+  e.preventDefault();
+
+  $("loginError").textContent = "ログイン中...";
+
+  try {
+    const result =
+      await firebaseFns.signInWithEmailAndPassword(
+        auth,
+        $("loginEmail").value,
+        $("loginPassword").value
+      );
+
+    $("loginPassword").value = "";
+
+    if (result.user.uid !== HOST_UID) {
+      await firebaseFns.signOut(auth);
+
+      throw Error(
+        "このアカウントには編集権限がありません"
+      );
+    }
+
+    isHost = true;
+    $("loginDialog").close();
+    render();
+    switchView(true);
+
+  } catch (err) {
+    $("loginError").textContent =
+      "ログインできませんでした：" + err.message;
+  }
+});
+
+// ログアウト
+$("logoutButton").onclick = async () => {
+  if (auth) {
+    await firebaseFns.signOut(auth);
+    switchView(false);
+  }
+};
+
+// ========================================
+// Firebase接続
+// ========================================
+
+if (DEMO) {
+
+  // Firebase未設定ならデモモード
+  showConnection(
+    "デモモード：まだ全員には共有されません",
+    "demo"
+  );
+
+  loadMarks();
+  render();
+
+} else {
+
+  showConnection("カードを読み込み中...","demo");
+  render();
+
+  try {
+
+    const [
+      {initializeApp},
+      {getFirestore,doc,onSnapshot,setDoc},
+      {
+        getAuth,
+        signInWithEmailAndPassword,
+        onAuthStateChanged,
+        signOut
+      }
+    ] = await Promise.all([
+
+      import(
+        "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js"
+      ),
+
+      import(
+        "https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js"
+      ),
+
+      import(
+        "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js"
+      )
+
+    ]);
+
+    firebaseFns = {
+      setDoc,
+      signInWithEmailAndPassword,
+      signOut
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    auth = getAuth(app);
+
+    fireDoc = doc(db,"bingoRooms","main");
+
+    // ログイン状態の監視
+    onAuthStateChanged(auth,user => {
+      isHost = !!user && user.uid === HOST_UID;
+
+      if (!isHost && isEditor) {
+        switchView(false);
+      }
+
+      render();
+    });
+
+    // 公開カードのリアルタイム監視
+    onSnapshot(fireDoc,snapshot => {
+
+      if (snapshot.exists()) {
+
+        applyBoard(snapshot.data());
+
+        showConnection(
+          "オンライン同期中：ホストの更新が反映されます",
+          "live"
+        );
+
+      } else {
+
+        board = null;
+        marks.clear();
+        render();
+
+        showConnection(
+          "ホストの公開待ち",
+          "demo"
+        );
+
+      }
+
+    },error => {
+
+      showConnection(
+        "読み込みエラー：" + error.message,
+        "error"
+      );
+
+    });
+
+  } catch (err) {
+
+    showConnection(
+      "接続エラー：" + err.message,
+      "error"
+    );
+
+  }
+
+}
+
+</script>
+</body>
+</html>
